@@ -298,7 +298,7 @@ def build_parser() -> argparse.ArgumentParser:
     # ── serve-webhook ─────────────────────────────────────────────────────────
     wh = sub.add_parser("serve-webhook", help="Start a webhook HTTP endpoint")
     wh.add_argument("--type", choices=["call", "email", "financial"], required=True)
-    wh.add_argument("--port", type=int, default=8080)
+    wh.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8080)))
     wh.add_argument("--guardian-contact", default="+1-555-0100", dest="guardian_contact")
 
     return p
