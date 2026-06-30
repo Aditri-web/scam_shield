@@ -229,8 +229,8 @@ def cmd_serve_webhook(args) -> None:
     @app.post("/webhook")
     @app.post("/api/scan")
     async def scan(request: ScanRequest, req: Request):
-        # Optional HMAC verification if WEBHOOK_SECRET is set
-        if secret:
+        # Optional HMAC verification if WEBHOOK_SECRET is set (only for /webhook, not UI)
+        if secret and req.url.path == "/webhook":
             body = await req.body()
             sig = req.headers.get("X-ScamShield-Signature", "")
             expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
