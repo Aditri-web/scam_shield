@@ -24,10 +24,16 @@ def risk_scorer(
       55% text score, 35% URL score, up to +8 channel weight.
     """
     text_score = (text_result or {}).get("raw_text_score", 0)
-    url_score = max((r.get("url_risk_score", 0) for r in url_results), default=0)
     channel_weight = _CHANNEL_WEIGHTS.get(channel_hint, 0)
-
-    combined = round(0.55 * text_score + 0.35 * url_score + channel_weight)
+    
+    if url_results:
+        url_score = max((r.get("url_risk_score", 0) for r in url_results), default=0)
+        combined = round(0.55 * text_score + 0.35 * url_score + channel_weight)
+    else:
+        url_score = 0
+        # When there are no URLs, we rely mostly on the text score
+        combined = round(0.9 * text_score + channel_weight)
+        
     combined = min(100, combined)
 
     if combined >= THRESHOLDS["high"]:

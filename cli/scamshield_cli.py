@@ -25,7 +25,13 @@ import json
 import os
 import sys
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import Optional
 
 # ── Path bootstrap ────────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -189,70 +195,71 @@ def cmd_verify_audit(args) -> None:
 
 def cmd_serve_webhook(args) -> None:
     """
-    Minimal HTTP server that accepts POST /webhook with a JSON body.
-
-    Body schema:
-      { "user_id": "...", "text": "...", "sender": "..." (optional) }
-
-    Secured via HMAC-SHA256 if WEBHOOK_SECRET env var is set.
+    FastAPI HTTP server that accepts POST /webhook (or /api/scan) with a JSON body.
+    Supports CORS for frontends and dynamic input_type selection.
     """
     guardian = GuardianAgent(guardian_contact=args.guardian_contact)
-    input_type = args.type
     secret = os.getenv("WEBHOOK_SECRET", "")
+    
+    app = FastAPI(title="ScamShield API")
 
-    class _Handler(BaseHTTPRequestHandler):
-        def log_message(self, fmt, *a):
-            pass  # silence default access log
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-        def do_POST(self):
-            if self.path != "/webhook":
-                self.send_response(404)
-                self.end_headers()
-                return
+    class ScanRequest(BaseModel):
+        user_id: str = "webhook-anon"
+        input_type: str = getattr(args, "type", "email") # fallback to args.type if missing
+        text: str
+        sender: Optional[str] = None
 
-            length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(length)
+    @app.post("/webhook")
+    @app.post("/api/scan")
+    async def scan(request: ScanRequest, req: Request):
+        # Optional HMAC verification if WEBHOOK_SECRET is set
+        if secret:
+            body = await req.body()
+            sig = req.headers.get("X-ScamShield-Signature", "")
+            expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(sig, expected):
+                raise HTTPException(status_code=403, detail="invalid_signature")
 
-            # HMAC verification (optional)
-            if secret:
-                sig = self.headers.get("X-ScamShield-Signature", "")
-                expected = hmac.new(
-                    secret.encode(), body, hashlib.sha256
-                ).hexdigest()
-                if not hmac.compare_digest(sig, expected):
-                    self.send_response(403)
-                    self.end_headers()
-                    self.wfile.write(b'{"error":"invalid_signature"}')
-                    return
+        valid_types = {"call", "email", "financial"}
+        if request.input_type not in valid_types:
+            raise HTTPException(status_code=400, detail=f"Invalid input_type. Must be one of {valid_types}")
 
-            try:
-                payload = json.loads(body)
-            except json.JSONDecodeError:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(b'{"error":"invalid_json"}')
-                return
-
-            result = guardian.process(
-                user_id=payload.get("user_id", "webhook-anon"),
-                input_type=input_type,
-                text=payload.get("text", ""),
-                sender=payload.get("sender"),
+        try:
+            return guardian.process(
+                user_id=request.user_id,
+                input_type=request.input_type,
+                text=request.text,
+                sender=request.sender
             )
-            resp_body = json.dumps(result, default=str).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(resp_body)))
-            self.end_headers()
-            self.wfile.write(resp_body)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
-    server = HTTPServer(("0.0.0.0", args.port), _Handler)
-    print(f"ScamShield webhook server listening on port {args.port} (type={input_type})")
-    print("POST to http://localhost:{args.port}/webhook")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nShutting down.")
+    # Serve the frontend statically
+    frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+    if os.path.isdir(frontend_dir):
+        app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+
+        @app.get("/")
+        async def serve_index():
+            index_file = os.path.join(frontend_dir, "index.html")
+            if os.path.exists(index_file):
+                return FileResponse(index_file)
+            return {"message": "Frontend not found."}
+    else:
+        @app.get("/")
+        async def serve_index():
+            return {"message": "ScamShield API is running. Frontend directory not found."}
+
+    print(f"ScamShield API/Webhook server starting on port {args.port}")
+    uvicorn.run(app, host="0.0.0.0", port=args.port, log_level="info")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
