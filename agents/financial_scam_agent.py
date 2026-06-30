@@ -2,6 +2,7 @@
 romance-scam money requests, fake crypto platforms."""
 from mcp_server.server import dispatch
 from security.input_sanitizer import sanitize_text
+from agents.gemini_analyzer import GeminiAnalyzer
 
 # Domain-specific terms that aren't in the general scam_patterns.json
 _EXTRA_TERMS: list[str] = [
@@ -25,6 +26,9 @@ _EXTRA_WEIGHT_PER_HIT = 15
 class FinancialScamAgent:
     name = "financial_scam_agent"
 
+    def __init__(self):
+        self.gemini = GeminiAnalyzer()
+
     def analyze(self, text: str) -> dict:
         """
         Analyse text for financial / investment fraud indicators.
@@ -33,6 +37,30 @@ class FinancialScamAgent:
         extended patterns, then scores the combined signal.
         """
         clean = sanitize_text(text)
+
+        # Try Gemini if enabled
+        if self.gemini.is_enabled:
+            prompt = (
+                "You are an expert financial and investment fraud analyst. Analyze this message "
+                "for signs of financial scams (e.g., pump-and-dump, advance-fee fraud, pig butchering, "
+                "unrealistically high guaranteed investment returns, fake crypto platforms, or money requests).\n\n"
+                f"Content:\n{clean.clean_text}"
+            )
+            analysis = self.gemini.analyze(prompt)
+            if analysis:
+                return {
+                    "agent": self.name,
+                    "sanitizer_flags": clean.flags,
+                    "gemini_analyzed": True,
+                    "risk": {
+                        "final_score": analysis.score,
+                        "verdict": analysis.verdict,
+                        "reasoning": analysis.reasoning,
+                        "red_flags": analysis.red_flags,
+                    },
+                }
+
+        # Fallback to Rule-based Analysis
         text_result = dispatch("analyze_text", text=clean.clean_text)
 
         lowered = clean.clean_text.lower()
@@ -54,6 +82,8 @@ class FinancialScamAgent:
         return {
             "agent": self.name,
             "sanitizer_flags": clean.flags,
+            "gemini_analyzed": False,
             "text_analysis": text_result,
             "risk": verdict,
         }
+

@@ -11,6 +11,7 @@ setup(
         "anthropic>=0.40.0",
         "mcp>=1.0.0",
         "google-adk>=0.3.0",
+        "google-genai>=0.1.1",
         "python-dotenv>=1.0.0",
         "click>=8.1.0",
         "httpx>=0.27.0",

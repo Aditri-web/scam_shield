@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKER",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "python -m cli.scamshield_cli serve-webhook --type email --port 8080",
+    "restartPolicyType": "ON_FAILURE",
+    "numReplicas": 1
+  }
+}

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: scamshield-webhook
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerCommand: python -m cli.scamshield_cli serve-webhook --type email --port 8080
+    port: 8080
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # User will set their actual API key in Render Dashboard
+      - key: WEBHOOK_SECRET
+        generateValue: true # Generates a random secure HMAC secret automatically
+      - key: GUARDIAN_DEFAULT_CONTACT
+        value: "+1-555-0100"
