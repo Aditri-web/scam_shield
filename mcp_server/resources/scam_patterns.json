@@ -1,0 +1,32 @@
+{
+  "urgency_phrases": [
+    "act now", "immediate action required", "your account will be suspended",
+    "verify your identity within 24 hours", "final notice", "last warning",
+    "you have won", "claim your prize", "limited time offer",
+    "respond immediately", "expires today", "deadline passed"
+  ],
+  "financial_red_flags": [
+    "wire transfer", "gift card", "bitcoin", "crypto wallet", "western union",
+    "send money to", "processing fee", "unlock your funds", "advance fee",
+    "guaranteed returns", "risk-free investment", "double your money",
+    "money gram", "zelle payment", "venmo payment", "cash app", "prepaid debit"
+  ],
+  "impersonation_terms": [
+    "irs", "social security administration", "amazon support", "microsoft support",
+    "bank security team", "tech support", "government grant", "law enforcement",
+    "fbi", "federal reserve", "drug enforcement", "customs and border protection",
+    "apple support", "google support", "paypal security"
+  ],
+  "credential_harvest_terms": [
+    "confirm your password", "update your billing information", "click here to verify",
+    "enter your ssn", "enter your pin", "your card has been locked",
+    "verify your account", "confirm your social security", "provide your date of birth",
+    "enter your mother's maiden name", "reset your password now"
+  ],
+  "emotional_manipulation": [
+    "grandchild in trouble", "arrested", "hospital emergency", "kidnapped",
+    "do not tell anyone", "keep this confidential", "this is urgent and secret",
+    "loved one in danger", "bail money", "emergency situation",
+    "do not hang up", "stay on the line"
+  ]
+}

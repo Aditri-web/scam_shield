@@ -1,0 +1,12 @@
+{
+  "trusted_domains": [
+    "irs.gov", "ssa.gov", "usa.gov", "amazon.com", "paypal.com",
+    "microsoft.com", "apple.com", "bankofamerica.com", "chase.com",
+    "wellsfargo.com", "google.com", "fdic.gov", "consumerfinance.gov",
+    "citibank.com", "usbank.com", "td.com", "capitalone.com",
+    "discover.com", "americanexpress.com", "ebay.com", "walmart.com",
+    "target.com", "bestbuy.com", "netflix.com", "spotify.com",
+    "facebook.com", "instagram.com", "twitter.com", "linkedin.com"
+  ],
+  "common_lookalike_tlds": [".xyz", ".top", ".club", ".support", ".live", ".click", ".info", ".online", ".site", ".tech"]
+}
