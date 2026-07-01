@@ -27,7 +27,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-guardian = GuardianAgent(guardian_contact=os.getenv("GUARDIAN_DEFAULT_CONTACT", "+1-555-0100"))
+# Vercel has a read-only filesystem, so we must write logs to /tmp
+os.environ["NOTIFICATION_LOG"] = "/tmp/family_notifications.log"
+
+guardian = GuardianAgent(
+    guardian_contact=os.getenv("GUARDIAN_DEFAULT_CONTACT", "+1-555-0100"),
+    audit_path="/tmp/scamshield_audit.log"
+)
 secret = os.getenv("WEBHOOK_SECRET", "")
 
 class ScanRequest(BaseModel):
