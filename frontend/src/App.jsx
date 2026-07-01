@@ -11,7 +11,9 @@ const SCAM_PATTERNS = {
     "act now", "immediate action required", "your account will be suspended",
     "verify your identity within 24 hours", "final notice", "last warning",
     "you have won", "claim your prize", "limited time offer",
-    "respond immediately", "expires today", "deadline passed"
+    "respond immediately", "expires today", "deadline passed",
+    "prevent suspension", "prevent account suspension", "unauthorized charge",
+    "unauthorized transaction", "unauthorized withdrawal"
   ],
   financial_red_flags: [
     "wire transfer", "gift card", "bitcoin", "crypto wallet", "western union",
@@ -23,14 +25,16 @@ const SCAM_PATTERNS = {
     "irs", "social security administration", "amazon support", "microsoft support",
     "bank security team", "tech support", "government grant", "law enforcement",
     "fbi", "federal reserve", "drug enforcement", "customs and border protection",
-    "apple support", "google support", "paypal security"
+    "apple support", "google support", "paypal security", "bank support", "it department",
+    "technical support", "security department"
   ],
   credential_harvest_terms: [
     "confirm your password", "update your billing information", "click here to verify",
     "enter your ssn", "enter your pin", "your card has been locked",
     "verify your account", "confirm your social security", "provide your date of birth",
     "enter your mother's maiden name", "reset your password now", "otp", "one time password",
-    "one-time password", "verification code", "authorization code"
+    "one-time password", "verification code", "authorization code", "pin", "cvv",
+    "anydesk", "teamviewer", "remote access", "remote support", "screen share"
   ],
   emotional_manipulation: [
     "grandchild in trouble", "arrested", "hospital emergency", "kidnapped",
@@ -390,9 +394,9 @@ function App() {
     let finalScore = Math.round(0.55 * textScore + 0.35 * maxUrlScore + channelWeight);
     finalScore = Math.min(100, finalScore);
     
-    // HARDCODE: Automatically escalate to at least LIKELY_SCAM (65) if credential harvesting/OTP requested
+    // HARDCODE: Automatically escalate to HIGH_RISK_SCAM (85) if credential harvesting/OTP/PIN/CVV/remote access requested
     if (findings.credential_harvest_terms) {
-      finalScore = Math.max(finalScore, 65);
+      finalScore = Math.max(finalScore, 85);
     }
     
     setPipelineLog(prev => [...prev, {

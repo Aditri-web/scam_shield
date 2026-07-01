@@ -24,9 +24,9 @@ class CallProtectionAgent:
         if self.gemini.is_enabled:
             prompt = (
                 "You are an expert voice call scam protection assistant. Analyze this "
-                "transcript of a voice call for potential scam indicators (impersonation, "
-                "emotional manipulation, urgency, requests for sensitive details, financial payments, "
-                "or requests for OTPs/verification codes which are highly malicious).\n\n"
+                "transcript of a voice call for potential scam indicators (impersonation like Bank Support or IT Department, "
+                "emotional manipulation, extreme urgency to prevent suspension/unauthorized charges, requests for sensitive details, "
+                "financial payments, requests for OTP/verification codes/PIN/CVV, or requests to download remote access tools like AnyDesk/TeamViewer which are highly malicious).\n\n"
                 f"Transcript:\n{clean.clean_text}"
             )
             analysis = self.gemini.analyze(prompt)
