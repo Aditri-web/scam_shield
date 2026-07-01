@@ -29,7 +29,8 @@ const SCAM_PATTERNS = {
     "confirm your password", "update your billing information", "click here to verify",
     "enter your ssn", "enter your pin", "your card has been locked",
     "verify your account", "confirm your social security", "provide your date of birth",
-    "enter your mother's maiden name", "reset your password now"
+    "enter your mother's maiden name", "reset your password now", "otp", "one time password",
+    "one-time password", "verification code", "authorization code"
   ],
   emotional_manipulation: [
     "grandchild in trouble", "arrested", "hospital emergency", "kidnapped",
@@ -388,6 +389,11 @@ function App() {
     // Combined core score
     let finalScore = Math.round(0.55 * textScore + 0.35 * maxUrlScore + channelWeight);
     finalScore = Math.min(100, finalScore);
+    
+    // HARDCODE: Automatically escalate to at least LIKELY_SCAM (65) if credential harvesting/OTP requested
+    if (findings.credential_harvest_terms) {
+      finalScore = Math.max(finalScore, 65);
+    }
     
     setPipelineLog(prev => [...prev, {
       step: `${targetAgent} (Signal Extraction)`,
