@@ -55,7 +55,7 @@ class PhishingEmailAgent:
             prompt = (
                 "You are an expert phishing email detection assistant. Analyze the email body, sender, "
                 "and embedded links for phishing indicators (e.g., impersonation, lookalike domains, credential harvesting, "
-                "urgency, suspicious links).\n\n"
+                "urgency, suspicious links, or requests for OTPs/2FA codes which are highly malicious).\n\n"
                 f"Context:\n"
                 f"  {sender_context}\n"
                 f"  Embedded Link Analysis:\n{url_context}\n\n"
