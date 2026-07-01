@@ -19,7 +19,10 @@ const SCAM_PATTERNS = {
     "wire transfer", "gift card", "bitcoin", "crypto wallet", "western union",
     "send money to", "processing fee", "unlock your funds", "advance fee",
     "guaranteed returns", "risk-free investment", "double your money",
-    "money gram", "zelle payment", "venmo payment", "cash app", "prepaid debit"
+    "money gram", "zelle payment", "venmo payment", "cash app", "prepaid debit",
+    "send money", "send payment", "transfer funds", "transfer money", "wire money",
+    "deposit money", "payment required", "needs money", "demanding money", "request money",
+    "pay me", "cash out"
   ],
   impersonation_terms: [
     "irs", "social security administration", "amazon support", "microsoft support",
@@ -397,6 +400,11 @@ function App() {
     // HARDCODE: Automatically escalate to HIGH_RISK_SCAM (85) if credential harvesting/OTP/PIN/CVV/remote access requested
     if (findings.credential_harvest_terms) {
       finalScore = Math.max(finalScore, 85);
+    }
+    
+    // HARDCODE: Automatically escalate to LIKELY_SCAM (65) if financial solicitation/asking for money is detected
+    if (findings.financial_red_flags) {
+      finalScore = Math.max(finalScore, 65);
     }
     
     setPipelineLog(prev => [...prev, {
