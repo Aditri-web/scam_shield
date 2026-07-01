@@ -41,10 +41,10 @@ class FinancialScamAgent:
         # Try Gemini if enabled
         if self.gemini.is_enabled:
             prompt = (
-                "You are an expert financial and investment fraud analyst. Analyze this message "
-                "for signs of financial scams (e.g., pump-and-dump, advance-fee fraud, pig butchering, "
-                "unrealistically high guaranteed investment returns, fake crypto platforms, or money requests).\n\n"
-                f"Content:\n{clean.clean_text}"
+                "You are an expert financial fraud detection assistant. Analyze the text "
+                "for indications of financial scams (e.g., impersonation like Bank Support or IT Department, advance fee fraud, crypto investment scams, "
+                "fake invoices, requests for gift cards or wire transfers, requests for OTP/verification codes/PIN/CVV, extreme urgency to prevent suspension/unauthorized charges, or requests to download remote access tools like AnyDesk/TeamViewer).\n\n"
+                f"Text:\n{clean.clean_text}"
             )
             analysis = self.gemini.analyze(prompt)
             if analysis:

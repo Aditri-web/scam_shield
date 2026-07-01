@@ -36,6 +36,14 @@ def risk_scorer(
         
     combined = min(100, combined)
 
+    # HARDCODE: Automatically escalate to HIGH_RISK_SCAM (85) if credential harvesting/OTP/PIN/CVV/remote access requested
+    if "credential_harvest_terms" in (text_result or {}).get("matched_categories", {}):
+        combined = max(combined, 85)
+
+    # HARDCODE: Automatically escalate to LIKELY_SCAM (65) if financial solicitation/asking for money is detected
+    if "financial_red_flags" in (text_result or {}).get("matched_categories", {}):
+        combined = max(combined, 65)
+
     if combined >= THRESHOLDS["high"]:
         verdict = "HIGH_RISK_SCAM"
     elif combined >= THRESHOLDS["medium"]:
